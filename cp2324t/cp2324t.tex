@@ -1,0 +1,1528 @@
+\documentclass[11pt, a4paper, fleqn]{article}
+\usepackage{cp2324t}
+\makeindex
+
+%================= lhs2tex=====================================================%
+%% ODER: format ==         = "\mathrel{==}"
+%% ODER: format /=         = "\neq "
+%
+%
+\makeatletter
+\@ifundefined{lhs2tex.lhs2tex.sty.read}%
+  {\@namedef{lhs2tex.lhs2tex.sty.read}{}%
+   \newcommand\SkipToFmtEnd{}%
+   \newcommand\EndFmtInput{}%
+   \long\def\SkipToFmtEnd#1\EndFmtInput{}%
+  }\SkipToFmtEnd
+
+\newcommand\ReadOnlyOnce[1]{\@ifundefined{#1}{\@namedef{#1}{}}\SkipToFmtEnd}
+\usepackage{amstext}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\DeclareFontFamily{OT1}{cmtex}{}
+\DeclareFontShape{OT1}{cmtex}{m}{n}
+  {<5><6><7><8>cmtex8
+   <9>cmtex9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmtex10}{}
+\DeclareFontShape{OT1}{cmtex}{m}{it}
+  {<-> ssub * cmtt/m/it}{}
+\newcommand{\texfamily}{\fontfamily{cmtex}\selectfont}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+  {<5><6><7><8>cmtt8
+   <9>cmbtt9
+   <10><10.95><12><14.4><17.28><20.74><24.88>cmbtt10}{}
+\DeclareFontShape{OT1}{cmtex}{bx}{n}
+  {<-> ssub * cmtt/bx/n}{}
+\newcommand{\tex}[1]{\text{\texfamily#1}}	% NEU
+
+\newcommand{\Sp}{\hskip.33334em\relax}
+
+
+\newcommand{\Conid}[1]{\mathit{#1}}
+\newcommand{\Varid}[1]{\mathit{#1}}
+\newcommand{\anonymous}{\kern0.06em \vbox{\hrule\@width.5em}}
+\newcommand{\plus}{\mathbin{+\!\!\!+}}
+\newcommand{\bind}{\mathbin{>\!\!\!>\mkern-6.7mu=}}
+\newcommand{\rbind}{\mathbin{=\mkern-6.7mu<\!\!\!<}}% suggested by Neil Mitchell
+\newcommand{\sequ}{\mathbin{>\!\!\!>}}
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\usepackage{polytable}
+
+%mathindent has to be defined
+\@ifundefined{mathindent}%
+  {\newdimen\mathindent\mathindent\leftmargini}%
+  {}%
+
+\def\resethooks{%
+  \global\let\SaveRestoreHook\empty
+  \global\let\ColumnHook\empty}
+\newcommand*{\savecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\savecolumns[#1]}}
+\newcommand*{\restorecolumns}[1][default]%
+  {\g@addto@macro\SaveRestoreHook{\restorecolumns[#1]}}
+\newcommand*{\aligncolumn}[2]%
+  {\g@addto@macro\ColumnHook{\column{#1}{#2}}}
+
+\resethooks
+
+\newcommand{\onelinecommentchars}{\quad-{}- }
+\newcommand{\commentbeginchars}{\enskip\{-}
+\newcommand{\commentendchars}{-\}\enskip}
+
+\newcommand{\visiblecomments}{%
+  \let\onelinecomment=\onelinecommentchars
+  \let\commentbegin=\commentbeginchars
+  \let\commentend=\commentendchars}
+
+\newcommand{\invisiblecomments}{%
+  \let\onelinecomment=\empty
+  \let\commentbegin=\empty
+  \let\commentend=\empty}
+
+\visiblecomments
+
+\newlength{\blanklineskip}
+\setlength{\blanklineskip}{0.66084ex}
+
+\newcommand{\hsindent}[1]{\quad}% default is fixed indentation
+\let\hspre\empty
+\let\hspost\empty
+\newcommand{\NB}{\textbf{NB}}
+\newcommand{\Todo}[1]{$\langle$\textbf{To do:}~#1$\rangle$}
+
+\EndFmtInput
+\makeatother
+%
+%
+%
+%
+%
+%
+% This package provides two environments suitable to take the place
+% of hscode, called "plainhscode" and "arrayhscode". 
+%
+% The plain environment surrounds each code block by vertical space,
+% and it uses \abovedisplayskip and \belowdisplayskip to get spacing
+% similar to formulas. Note that if these dimensions are changed,
+% the spacing around displayed math formulas changes as well.
+% All code is indented using \leftskip.
+%
+% Changed 19.08.2004 to reflect changes in colorcode. Should work with
+% CodeGroup.sty.
+%
+\ReadOnlyOnce{polycode.fmt}%
+\makeatletter
+
+\newcommand{\hsnewpar}[1]%
+  {{\parskip=0pt\parindent=0pt\par\vskip #1\noindent}}
+
+% can be used, for instance, to redefine the code size, by setting the
+% command to \small or something alike
+\newcommand{\hscodestyle}{}
+
+% The command \sethscode can be used to switch the code formatting
+% behaviour by mapping the hscode environment in the subst directive
+% to a new LaTeX environment.
+
+\newcommand{\sethscode}[1]%
+  {\expandafter\let\expandafter\hscode\csname #1\endcsname
+   \expandafter\let\expandafter\endhscode\csname end#1\endcsname}
+
+% "compatibility" mode restores the non-polycode.fmt layout.
+
+\newenvironment{compathscode}%
+  {\par\noindent
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed\)%
+   \par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\compaths}{\sethscode{compathscode}}
+
+% "plain" mode is the proposed default.
+% It should now work with \centering.
+% This required some changes. The old version
+% is still available for reference as oldplainhscode.
+
+\newenvironment{plainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\hspre\(\let\hspost\)%
+   \pboxed}%
+  {\endpboxed%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newenvironment{oldplainhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+% Here, we make plainhscode the default environment.
+
+\newcommand{\plainhs}{\sethscode{plainhscode}}
+\newcommand{\oldplainhs}{\sethscode{oldplainhscode}}
+\plainhs
+
+% The arrayhscode is like plain, but makes use of polytable's
+% parray environment which disallows page breaks in code blocks.
+
+\newenvironment{arrayhscode}%
+  {\hsnewpar\abovedisplayskip
+   \advance\leftskip\mathindent
+   \hscodestyle
+   \let\\=\@normalcr
+   \(\parray}%
+  {\endparray\)%
+   \hsnewpar\belowdisplayskip
+   \ignorespacesafterend}
+
+\newcommand{\arrayhs}{\sethscode{arrayhscode}}
+
+% The mathhscode environment also makes use of polytable's parray 
+% environment. It is supposed to be used only inside math mode 
+% (I used it to typeset the type rules in my thesis).
+
+\newenvironment{mathhscode}%
+  {\parray}{\endparray}
+
+\newcommand{\mathhs}{\sethscode{mathhscode}}
+
+% texths is similar to mathhs, but works in text mode.
+
+\newenvironment{texthscode}%
+  {\(\parray}{\endparray\)}
+
+\newcommand{\texths}{\sethscode{texthscode}}
+
+% The framed environment places code in a framed box.
+
+\def\codeframewidth{\arrayrulewidth}
+\RequirePackage{calc}
+
+\newenvironment{framedhscode}%
+  {\parskip=\abovedisplayskip\par\noindent
+   \hscodestyle
+   \arrayrulewidth=\codeframewidth
+   \tabular{@{}|p{\linewidth-2\arraycolsep-2\arrayrulewidth-2pt}|@{}}%
+   \hline\framedhslinecorrect\\{-1.5ex}%
+   \let\endoflinesave=\\
+   \let\\=\@normalcr
+   \(\pboxed}%
+  {\endpboxed\)%
+   \framedhslinecorrect\endoflinesave{.5ex}\hline
+   \endtabular
+   \parskip=\belowdisplayskip\par\noindent
+   \ignorespacesafterend}
+
+\newcommand{\framedhslinecorrect}[2]%
+  {#1[#2]}
+
+\newcommand{\framedhs}{\sethscode{framedhscode}}
+
+% The inlinehscode environment is an experimental environment
+% that can be used to typeset displayed code inline.
+
+\newenvironment{inlinehscode}%
+  {\(\def\column##1##2{}%
+   \let\>\undefined\let\<\undefined\let\\\undefined
+   \newcommand\>[1][]{}\newcommand\<[1][]{}\newcommand\\[1][]{}%
+   \def\fromto##1##2##3{##3}%
+   \def\nextline{}}{\) }%
+
+\newcommand{\inlinehs}{\sethscode{inlinehscode}}
+
+% The joincode environment is a separate environment that
+% can be used to surround and thereby connect multiple code
+% blocks.
+
+\newenvironment{joincode}%
+  {\let\orighscode=\hscode
+   \let\origendhscode=\endhscode
+   \def\endhscode{\def\hscode{\endgroup\def\@currenvir{hscode}\\}\begingroup}
+   %\let\SaveRestoreHook=\empty
+   %\let\ColumnHook=\empty
+   %\let\resethooks=\empty
+   \orighscode\def\hscode{\endgroup\def\@currenvir{hscode}}}%
+  {\origendhscode
+   \global\let\hscode=\orighscode
+   \global\let\endhscode=\origendhscode}%
+
+\makeatother
+\EndFmtInput
+%
+%%format (bin (n) (k)) = "\Big(\vcenter{\xymatrix@R=1pt{" n "\\" k "}}\Big)"
+
+
+%------------------------------------------------------------------------------%
+
+
+%====== DEFINIR GRUPO E ELEMENTOS =============================================%
+
+\group{G13}
+\studentA{100764}{Duarte Afonso Freitas Ribeiro}
+\studentB{100596}{João Henrique da Silva Gomes Peres Coelho}
+\studentC{100692}{José Filipe Ribeiro Rodrigues}
+
+%==============================================================================%
+
+\begin{document}
+\sffamily
+\setlength{\parindent}{0em}
+\emergencystretch 3em
+\renewcommand{\baselinestretch}{1.25} 
+\input{Cover}
+\pagestyle{pagestyle}
+
+\newgeometry{left=25mm,right=20mm,top=25mm,bottom=25mm}
+\setlength{\parindent}{1em}
+
+\section*{Preâmbulo}
+
+\CP\ tem como objectivo principal ensinar a progra\-mação de computadores
+como uma disciplina científica. Para isso parte-se de um repertório de \emph{combinadores}
+que formam uma álgebra da programação % (conjunto de leis universais e seus
+corolários) e usam-se esses combinadores para construir programas \emph{composicionalmente},
+isto é, agregando programas já existentes.
+
+Na sequência pedagógica dos planos de estudo dos cursos que têm
+esta disciplina, opta-se pela aplicação deste método à programação
+em \Haskell\ (sem prejuízo da sua aplicação a outras linguagens
+funcionais). Assim, o presente trabalho prático coloca os
+alunos perante problemas concretos que deverão ser implementados em
+\Haskell. Há ainda um outro objectivo: o de ensinar a documentar
+programas, a validá-los e a produzir textos técnico-científicos de
+qualidade.
+
+Antes de abodarem os problemas propostos no trabalho, os grupos devem ler
+com atenção o anexo \ref{sec:documentacao} onde encontrarão as instruções
+relativas ao sofware a instalar, etc.
+
+Valoriza-se a escrita de \emph{pouco} código que corresponda a soluções
+simples e elegantes que utilizem os combinadores de ordem superior estudados
+na disciplina.
+
+
+\Problema
+
+Este problema, retirado de um \emph{site} de exercícios de preparação para entrevistas de emprego, 
+tem uma formulação simples:
+\begin{quote}\em
+Dada uma matriz de uma qualquer dimensão, listar todos os seus elementos rodados em espiral. 
+Por exemplo, dadas as seguintes matrizes:
+
+	\figura
+
+\noindent
+dever-se-á obter, respetivamente, \ensuremath{[\mskip1.5mu \mathrm{1},\mathrm{2},\mathrm{3},\mathrm{6},\mathrm{9},\mathrm{8},\mathrm{7},\mathrm{4},\mathrm{5}\mskip1.5mu]} e \ensuremath{[\mskip1.5mu \mathrm{1},\mathrm{2},\mathrm{3},\mathrm{4},\mathrm{8},\mathrm{12},\mathrm{11},\mathrm{10},\mathrm{9},\mathrm{5},\mathrm{6},\mathrm{7}\mskip1.5mu]}.
+\\ $\Box$
+\end{quote}
+
+\noindent
+Valorizar-se-ão as soluções \emph{pointfree} que empreguem os combinadores
+estudados na disciplina, e.g. \ensuremath{\Varid{f}\comp \Varid{g}}, \ensuremath{\conj{\Varid{f}}{\Varid{g}}}, \ensuremath{\Varid{f}\times\Varid{g}}, \ensuremath{\alt{\Varid{f}}{\Varid{g}}}, \ensuremath{\Varid{f}\mathbin{+}\Varid{g}}, bem como
+catamorfismos e anamorfismos. 
+
+Recomenda-se a escrita de \emph{pouco} código e de soluções simples
+e fáceis de entender. Recomenda-se que o código venha acompanhado de uma
+descrição de como funciona e foi concebido, apoiado em diagramas explicativos.
+Para instruções sobre como produzir esses diagramas e exprimir raciocínios
+de cálculo, ver o anexo \ref{sec:diagramas}.
+
+\Problema
+
+Este problema, que de novo foi retirado de um \emph{site} de exercícios de preparação para entrevistas de emprego, tem uma formulação muito simples:
+\begin{quote}\em
+Inverter as vogais de um \emph{string}.
+\end{quote}
+Esta formulação deverá ser generalizada a:
+\begin{quote}\em
+Inverter os elementos de uma dada lista que satisfazem um dado predicado.
+\end{quote}
+
+\noindent
+Valorizam-se as soluções tal como no problema anterior e fazem-se as mesmas
+recomendações.
+
+\Problema
+
+Sistemas como \href{https://chat.openai.com/}{chatGPT} etc baseiam-se em
+algoritmos de aprendizagem automática que usam determinadas funções matemáticas,
+designadas \emph{activation functions} (AF), para modelar aspectos não li\-neares
+do mundo real. Uma dessas AFs é a
+\href{https://www.ml-science.com/tanh-activation-function}{tangente hiperbólica},
+definida como o quociente do seno e coseno
+\href{https://en.wikipedia.org/wiki/Hyperbolic_functions}{hiperbólicos}, 
+\begin{eqnarray}
+	\tanh x = \frac{\sinh x}{\cosh x}
+	\label{eq:tanh}
+\end{eqnarray}
+podendo estes ser definidos pelas seguintes \taylor{séries de Taylor}:
+\begin{eqnarray}
+\start
+	\sum_{k=0}^\infty \frac{x^{2k+1}}{(2k+1)!}=\sinh x
+	\label{eq:sinh}
+\more
+	\sum_{k=0}^\infty \frac{x^{2k}}{(2k)!}=\cosh x
+	\nonumber
+\end{eqnarray}
+
+Interessa que estas funções sejam implementadas de forma muito eficiente,
+desdobrando-as em ope\-rações aritméticas elementares. Isso pode ser conseguido
+através da chamada \pd{programação dinâmica} que, em \cp{Cálculo de Programas},
+é feita de forma \emph{correct-by-construction} derivando-se ciclos-\textbf{for} via
+lei de recursividade mútua generalizada a tantas funções quanto necessário
+--- ver o anexo \ref{sec:mr}. 
+
+O objectivo desta questão é codificar como um ciclo-\textsf{for} (em Haskell) a função
+\begin{eqnarray}
+	snh\ x\ i = \sum_{k=0}^i \frac{x^{2k+1}}{(2k+1)!}
+\end{eqnarray}
+que implementa \ensuremath{\Varid{sinh}\;\Varid{x}}, uma das funções de \ensuremath{\Varid{tanh}\;\Varid{x}} (\ref{eq:tanh}), através
+da soma das \ensuremath{\Varid{i}} primeiras parcelas da sua série (\ref{eq:sinh}).
+
+Deverá ser seguida a regra prática do anexo \ref{sec:mr} e documentada a
+solução proposta com todos os cálculos que se fizerem.
+
+\Problema
+
+Uma empresa de transportes urbanos pretende fornecer um serviço de previsão
+de atrasos dos seus autocarros que esteja sempre actual, com base em \emph{feedback}
+dos seus paassageiros. Para isso, desenvolveu uma \emph{app} que instala
+num telemóvel um botão que indica coordenadas GPS a um serviço central, de
+forma anónima, sugerindo que os passageiros o usem preferencialmente sempre
+que o autocarro onde vão chega a uma paragem.
+
+Com base nesses dados, outra funcionalidade da \emph{app} informa os utentes
+do serviço sobre a probabilidade do atraso que possa haver entre duas paragens
+(partida e chegada) de uma qualquer linha.
+
+Pretende-se implementar esta segunda funcionalidade assumindo disponíveis
+os dados da primeira. No que se segue, ir-se-á trabalhar sobre um modelo
+intencionalmente \emph{muito simplificado} deste sistema, em que se usará
+o mónade das distribuições probabilísticas (ver o anexo \ref{sec:probabilities}).
+Ter-se-á, então:
+\begin{itemize}
+\item paragens de autocarro
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{data}\;\Conid{Stop}\mathrel{=}\Conid{S0}\mid \Conid{S1}\mid \Conid{S2}\mid \Conid{S3}\mid \Conid{S4}\mid \Conid{S5}\;\mathbf{deriving}\;(\Conid{Show},\Conid{Eq},\Conid{Ord},\Conid{Enum}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+que formam a linha \ensuremath{[\mskip1.5mu \Conid{S0}\mathinner{\ldotp\ldotp}\Conid{S5}\mskip1.5mu]} assumindo a ordem determinada pela instância
+de \ensuremath{\Conid{Stop}} na classe \ensuremath{\Conid{Enum}};
+\item	segmentos da linha, isto é, percursos entre duas paragens consecutivas:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{type}\;\Conid{Segment}\mathrel{=}(\Conid{Stop},\Conid{Stop}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\item os dados obtidos a partir da \emph{app} dos passageiros que, após algum
+processamento, ficam disponíveis sob a forma de pares
+	\emph{(segmento, atraso observado)}:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{dados}\mathbin{::}[\mskip1.5mu (\Conid{Segment},\Conid{Delay})\mskip1.5mu]{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+(Ver no apêndice \ref{sec:codigo}, página \pageref{pg:dados}, uma pequena amostra
+destes dados.)
+\end{itemize}
+A partir destes dados, há que:
+\begin{itemize}
+\item	gerar a base de dados probabilística
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{db}\mathbin{::}[\mskip1.5mu (\Conid{Segment},\fun{Dist}\;\Conid{Delay})\mskip1.5mu]{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+que regista, estatisticamente, a probabilidade dos atrasos (\ensuremath{\Conid{Delay}}) que
+podem afectar cada segmento da linha. Recomenda-se aqui a definição de uma
+função genérica
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{mkdist}\mathbin{::}\Conid{Eq}\;\Varid{a}\Rightarrow [\mskip1.5mu \Varid{a}\mskip1.5mu]\to \fun{Dist}\;\Varid{a}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+que faça o sumário estatístico de uma qualquer lista finita, gerando a
+distribuição de ocorrência dos seus elementos.
+\item
+com base em \ensuremath{\Varid{db}}, definir a função probabilística
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{delay}\mathbin{::}\Conid{Segment}\to \fun{Dist}\;\Conid{Delay}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+que dará, para cada segmento, a respectiva distribuição de atrasos.
+\end{itemize}
+Finalmente, o objectivo principal é definir a função probabilística:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{pdelay}\mathbin{::}\Conid{Stop}\to \Conid{Stop}\to \fun{Dist}\;\Conid{Delay}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\ensuremath{\Varid{pdelay}\;\Varid{a}\;\Varid{b}} deverá informar qualquer utente que queira ir da paragem \ensuremath{\Varid{a}} até à
+paragem \ensuremath{\Varid{b}} de uma dada linha sobre a probabilidade de atraso acumulado no
+total do percurso \ensuremath{[\mskip1.5mu \Varid{a}\mathinner{\ldotp\ldotp}\Varid{b}\mskip1.5mu]}.
+
+Valorizar-se-ão as soluções que usem funcionalidades monádicas genéricas
+estudadas na disciplina e que sejam elegantes, isto é, poupem código desnecessário.
+
+\newpage
+\part*{Anexos}
+
+\appendix
+
+\section{Natureza do trabalho a realizar}
+\label{sec:documentacao}
+Este trabalho teórico-prático deve ser realizado por grupos de 3 alunos.
+Os detalhes da avaliação (datas para submissão do relatório e sua defesa
+oral) são os que forem publicados na \cp{página da disciplina} na \emph{internet}.
+
+Recomenda-se uma abordagem participativa dos membros do grupo em \textbf{todos}
+os exercícios do trabalho, para assim poderem responder a qualquer questão
+colocada na \emph{defesa oral} do relatório.
+
+Para cumprir de forma integrada os objectivos do trabalho vamos recorrer
+a uma técnica de programa\-ção dita ``\litp{literária}'' \cite{Kn92}, cujo
+princípio base é o seguinte:
+%
+\begin{quote}\em
+	Um programa e a sua documentação devem coincidir.
+\end{quote}
+%
+Por outras palavras, o \textbf{código fonte} e a \textbf{documentação} de um
+programa deverão estar no mesmo ficheiro.
+
+O ficheiro \texttt{cp2324t.pdf} que está a ler é já um exemplo de
+\litp{programação literária}: foi gerado a partir do texto fonte
+\texttt{cp2324t.lhs}\footnote{O sufixo `lhs' quer dizer
+\emph{\lhaskell{literate Haskell}}.} que encontrará no \MaterialPedagogico\
+desta disciplina des\-com\-pactando o ficheiro \texttt{cp2324t.zip}.
+
+Como se mostra no esquema abaixo, de um único ficheiro (\ensuremath{\Varid{lhs}})
+gera-se um PDF ou faz-se a interpretação do código \Haskell\ que ele inclui:
+
+	\esquema
+
+Vê-se assim que, para além do \GHCi, serão necessários os executáveis \PdfLatex\ e
+\LhsToTeX. Para facilitar a instalação e evitar problemas de versões e
+conflitos com sistemas operativos, é recomendado o uso do \Docker\ tal como
+a seguir se descreve.
+
+\section{Docker} \label{sec:docker}
+
+Recomenda-se o uso do \container\ cuja imagem é gerada pelo \Docker\ a partir do ficheiro
+\texttt{Dockerfile} que se encontra na diretoria que resulta de descompactar
+\texttt{cp2324t.zip}. Este \container\ deverá ser usado na execução
+do \GHCi\ e dos comandos relativos ao \Latex. (Ver também a \texttt{Makefile}
+que é disponibilizada.)
+
+Após \href{https://docs.docker.com/engine/install/}{instalar o Docker} e
+descarregar o referido zip com o código fonte do trabalho,
+basta executar os seguintes comandos:
+\begin{Verbatim}[fontsize=\small]
+    $ docker build -t cp2324t .
+    $ docker run -v ${PWD}:/cp2324t -it cp2324t
+\end{Verbatim}
+\textbf{NB}: O objetivo é que o container\ seja usado \emph{apenas} 
+para executar o \GHCi\ e os comandos relativos ao \Latex.
+Deste modo, é criado um \textit{volume} (cf.\ a opção \texttt{-v \$\{PWD\}:/cp2324t}) 
+que permite que a diretoria em que se encontra na sua máquina local 
+e a diretoria \texttt{/cp2324t} no \container\ sejam partilhadas.
+
+Pretende-se então que visualize/edite os ficheiros na sua máquina local e que
+os compile no \container, executando:
+\begin{Verbatim}[fontsize=\small]
+    $ lhs2TeX cp2324t.lhs > cp2324t.tex
+    $ pdflatex cp2324t
+\end{Verbatim}
+\LhsToTeX\ é o pre-processador que faz ``pretty printing'' de código Haskell
+em \Latex\ e que faz parte já do \container. Alternativamente, basta executar
+\begin{Verbatim}[fontsize=\small]
+    $ make
+\end{Verbatim}
+para obter o mesmo efeito que acima.
+
+Por outro lado, o mesmo ficheiro \texttt{cp2324t.lhs} é executável e contém
+o ``kit'' básico, escrito em \Haskell, para realizar o trabalho. Basta executar
+\begin{Verbatim}[fontsize=\small]
+    $ ghci cp2324t.lhs
+\end{Verbatim}
+
+\noindent Abra o ficheiro \texttt{cp2324t.lhs} no seu editor de texto preferido
+e verifique que assim é: todo o texto que se encontra dentro do ambiente
+\begin{quote}\small\tt
+\text{\ttfamily \char92{}begin\char123{}code\char125{}}
+\\ ... \\
+\text{\ttfamily \char92{}end\char123{}code\char125{}}
+\end{quote}
+é seleccionado pelo \GHCi\ para ser executado.
+
+\section{Em que consiste o TP}
+
+Em que consiste, então, o \emph{relatório} a que se referiu acima?
+É a edição do texto que está a ser lido, preenchendo o anexo \ref{sec:resolucao}
+com as respostas. O relatório deverá conter ainda a identificação dos membros
+do grupo de trabalho, no local respectivo da folha de rosto.
+
+Para gerar o PDF integral do relatório deve-se ainda correr os comando seguintes,
+que actualizam a bibliografia (com \Bibtex) e o índice remissivo (com \Makeindex),
+\begin{Verbatim}[fontsize=\small]
+    $ bibtex cp2324t.aux
+    $ makeindex cp2324t.idx
+\end{Verbatim}
+e recompilar o texto como acima se indicou. (Como já se disse, pode fazê-lo
+correndo simplesmente \texttt{make} no \container.)
+
+No anexo \ref{sec:codigo} disponibiliza-se algum código \Haskell\ relativo
+aos problemas que são colocados. Esse anexo deverá ser consultado e analisado
+à medida que isso for necessário.
+
+Deve ser feito uso da \litp{programação literária} para documentar bem o código que se
+desenvolver, em particular fazendo diagramas explicativos do que foi feito e
+tal como se explica no anexo \ref{sec:diagramas} que se segue.
+
+\section{Como exprimir cálculos e diagramas em LaTeX/lhs2TeX} \label{sec:diagramas}
+
+Como primeiro exemplo, estudar o texto fonte (\lhstotex{lhs}) do que está a ler\footnote{
+Procure e.g.\ por \texttt{"sec:diagramas"}.} onde se obtém o efeito seguinte:\footnote{Exemplos
+tirados de \cite{Ol18}.}
+\begin{eqnarray*}
+\start
+\ensuremath{\Varid{id}\mathrel{=}\conj{\Varid{f}}{\Varid{g}}}
+\just\equiv{ universal property }
+\ensuremath{\begin{lcbr}\p1\comp \Varid{id}\mathrel{=}\Varid{f}\\\p2\comp \Varid{id}\mathrel{=}\Varid{g}\end{lcbr}}
+\just\equiv{ identity }
+\ensuremath{\begin{lcbr}\p1\mathrel{=}\Varid{f}\\\p2\mathrel{=}\Varid{g}\end{lcbr}}
+\qed
+\end{eqnarray*}
+
+Os diagramas podem ser produzidos recorrendo à \emph{package} \Xymatrix, por exemplo:
+\begin{eqnarray*}
+\xymatrix@C=2cm{
+    \ensuremath{\N_0}
+           \ar[d]_-{\ensuremath{\cataNat{\Varid{g}}}}
+&
+    \ensuremath{\mathrm{1}\mathbin{+}\N_0}
+           \ar[d]^{\ensuremath{\Varid{id}\mathbin{+}\cataNat{\Varid{g}}}}
+           \ar[l]_-{\ensuremath{\mathsf{in}}}
+\\
+     \ensuremath{\Conid{B}}
+&
+     \ensuremath{\mathrm{1}\mathbin{+}\Conid{B}}
+           \ar[l]^-{\ensuremath{\Varid{g}}}
+}
+\end{eqnarray*}
+
+\section{Regra prática para a recursividade mútua em \ensuremath{\N_0}}\label{sec:mr}
+
+Nesta disciplina estudou-se como fazer \pd{programação dinâmica} por cálculo,
+recorrendo à lei de recursividade mútua.\footnote{Lei (\ref{eq:fokkinga})
+em \cite{Ol18}, página \pageref{eq:fokkinga}.}
+
+Para o caso de funções sobre os números naturais (\ensuremath{\N_0}, com functor \ensuremath{\fun F \;\Conid{X}\mathrel{=}\mathrm{1}\mathbin{+}\Conid{X}}) é fácil derivar-se da lei que foi estudada uma
+	\emph{regra de algibeira}
+	\label{pg:regra}
+que se pode ensinar a programadores que não tenham estudado
+\cp{Cálculo de Programas}. Apresenta-se de seguida essa regra, tomando como
+exemplo o cálculo do ciclo-\textsf{for} que implementa a função de Fibonacci,
+recordar o sistema:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{fib}\;\mathrm{0}\mathrel{=}\mathrm{1}{}\<[E]%
+\\
+\>[B]{}\Varid{fib}\;(\Varid{n}\mathbin{+}\mathrm{1})\mathrel{=}\Varid{f}\;\Varid{n}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{f}\;\mathrm{0}\mathrel{=}\mathrm{1}{}\<[E]%
+\\
+\>[B]{}\Varid{f}\;(\Varid{n}\mathbin{+}\mathrm{1})\mathrel{=}\Varid{fib}\;\Varid{n}\mathbin{+}\Varid{f}\;\Varid{n}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Obter-se-á de imediato
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{4}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{fib'}\mathrel{=}\p1\comp \for{\Varid{loop}}\ {\Varid{init}}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{4}{}\<[4]%
+\>[4]{}\Varid{loop}\;(\Varid{fib},\Varid{f})\mathrel{=}(\Varid{f},\Varid{fib}\mathbin{+}\Varid{f}){}\<[E]%
+\\
+\>[B]{}\hsindent{4}{}\<[4]%
+\>[4]{}\Varid{init}\mathrel{=}(\mathrm{1},\mathrm{1}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+usando as regras seguintes:
+\begin{itemize}
+\item	O corpo do ciclo \ensuremath{\Varid{loop}} terá tantos argumentos quanto o número de funções mutuamente recursivas.
+\item	Para as variáveis escolhem-se os próprios nomes das funções, pela ordem
+que se achar conveniente.\footnote{Podem obviamente usar-se outros símbolos, mas numa primeira leitura
+dá jeito usarem-se tais nomes.}
+\item	Para os resultados vão-se buscar as expressões respectivas, retirando a variável \ensuremath{\Varid{n}}.
+\item	Em \ensuremath{\Varid{init}} coleccionam-se os resultados dos casos de base das funções, pela mesma ordem.
+\end{itemize}
+Mais um exemplo, envolvendo polinómios do segundo grau $ax^2 + b x + c$ em \ensuremath{\N_0}.
+Seguindo o método estudado nas aulas\footnote{Secção 3.17 de \cite{Ol18} e tópico
+\href{https://www4.di.uminho.pt/~jno/media/cp/}{Recursividade mútua} nos vídeos de apoio às aulas teóricas.},
+de $f\ x = a x^2 + b x + c$ derivam-se duas funções mutuamente recursivas:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{f}\;\mathrm{0}\mathrel{=}\Varid{c}{}\<[E]%
+\\
+\>[B]{}\Varid{f}\;(\Varid{n}\mathbin{+}\mathrm{1})\mathrel{=}\Varid{f}\;\Varid{n}\mathbin{+}\Varid{k}\;\Varid{n}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{k}\;\mathrm{0}\mathrel{=}\Varid{a}\mathbin{+}\Varid{b}{}\<[E]%
+\\
+\>[B]{}\Varid{k}\;(\Varid{n}\mathbin{+}\mathrm{1})\mathrel{=}\Varid{k}\;\Varid{n}\mathbin{+}\mathrm{2}\;\Varid{a}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Seguindo a regra acima, calcula-se de imediato a seguinte implementação, em Haskell:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{f'}\;\Varid{a}\;\Varid{b}\;\Varid{c}\mathrel{=}\p1\comp \for{\Varid{loop}}\ {\Varid{init}}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{loop}\;(\Varid{f},\Varid{k})\mathrel{=}(\Varid{f}\mathbin{+}\Varid{k},\Varid{k}\mathbin{+}\mathrm{2}\mathbin{*}\Varid{a}){}\<[E]%
+\\
+\>[B]{}\hsindent{3}{}\<[3]%
+\>[3]{}\Varid{init}\mathrel{=}(\Varid{c},\Varid{a}\mathbin{+}\Varid{b}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\section{O mónade das distribuições probabilísticas} \label{sec:probabilities}
+Mónades são functores com propriedades adicionais que nos permitem obter
+efeitos especiais em progra\-mação. Por exemplo, a biblioteca \Probability\
+oferece um mónade para abordar problemas de probabilidades. Nesta biblioteca,
+o conceito de distribuição estatística é captado pelo tipo
+\begin{eqnarray}
+     \ensuremath{\mathbf{newtype}\;\fun{Dist}\;\Varid{a}\mathrel{=}\Conid{D}\;\{\mskip1.5mu \Varid{unD}\mathbin{::}[\mskip1.5mu (\Varid{a},\Conid{ProbRep})\mskip1.5mu]\mskip1.5mu\}}
+     \label{eq:Dist}
+\end{eqnarray}
+em que \ensuremath{\Conid{ProbRep}} é um real de \ensuremath{\mathrm{0}} a \ensuremath{\mathrm{1}}, equivalente a uma escala de $0$ a
+$100 \%$.
+
+Cada par \ensuremath{(\Varid{a},\Varid{p})} numa distribuição \ensuremath{\Varid{d}\mathbin{::}\fun{Dist}\;\Varid{a}} indica que a probabilidade
+de \ensuremath{\Varid{a}} é \ensuremath{\Varid{p}}, devendo ser garantida a propriedade de  que todas as probabilidades
+de \ensuremath{\Varid{d}} somam $100\%$.
+Por exemplo, a seguinte distribuição de classificações por escalões de $A$ a $E$,
+\[
+\begin{array}{ll}
+A & \rule{2mm}{3pt}\ 2\%\\
+B & \rule{12mm}{3pt}\ 12\%\\
+C & \rule{29mm}{3pt}\ 29\%\\
+D & \rule{35mm}{3pt}\ 35\%\\
+E & \rule{22mm}{3pt}\ 22\%\\
+\end{array}
+\]
+será representada pela distribuição
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{d1}\mathbin{::}\fun{Dist}\;\Conid{Char}{}\<[E]%
+\\
+\>[B]{}\Varid{d1}\mathrel{=}\Conid{D}\;[\mskip1.5mu (\text{\ttfamily 'A'},\mathrm{0.02}),(\text{\ttfamily 'B'},\mathrm{0.12}),(\text{\ttfamily 'C'},\mathrm{0.29}),(\text{\ttfamily 'D'},\mathrm{0.35}),(\text{\ttfamily 'E'},\mathrm{0.22})\mskip1.5mu]{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+que o \GHCi\ mostrará assim:
+\begin{Verbatim}[fontsize=\small]
+'D'  35.0%
+'C'  29.0%
+'E'  22.0%
+'B'  12.0%
+'A'   2.0%
+\end{Verbatim}
+É possível definir geradores de distribuições, por exemplo distribuições \emph{uniformes},
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{d2}\mathrel{=}\Varid{uniform}\;(\Varid{words}\;\text{\ttfamily \char34 Uma~frase~de~cinco~palavras\char34}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+isto é
+\begin{Verbatim}[fontsize=\small]
+     "Uma"  20.0%
+   "cinco"  20.0%
+      "de"  20.0%
+   "frase"  20.0%
+"palavras"  20.0%
+\end{Verbatim}
+distribuição \emph{normais}, eg.\
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{d3}\mathrel{=}\Varid{normal}\;[\mskip1.5mu \mathrm{10}\mathinner{\ldotp\ldotp}\mathrm{20}\mskip1.5mu]{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+etc.\footnote{Para mais detalhes ver o código fonte de \Probability, que é uma adaptação da
+biblioteca \PFP\ (``Probabilistic Functional Programming''). Para quem quiser saber mais
+recomenda-se a leitura do artigo \cite{EK06}.}
+\ensuremath{\fun{Dist}} forma um \textbf{mónade} cuja unidade é \ensuremath{\Varid{return}\;\Varid{a}\mathrel{=}\Conid{D}\;[\mskip1.5mu (\Varid{a},\mathrm{1})\mskip1.5mu]} e cuja composição de Kleisli
+é (simplificando a notação)
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{3}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[3]{}(\Varid{f}\kcomp \Varid{g})\;\Varid{a}\mathrel{=}[\mskip1.5mu (\Varid{y},\Varid{q}\mathbin{*}\Varid{p})\mid (\Varid{x},\Varid{p})\leftarrow \Varid{g}\;\Varid{a},(\Varid{y},\Varid{q})\leftarrow \Varid{f}\;\Varid{x}\mskip1.5mu]{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+em que \ensuremath{\Varid{g}\mathbin{:}\Conid{A}\to \fun{Dist}\;\mathit B} e \ensuremath{\Varid{f}\mathbin{:}\mathit B\to \fun{Dist}\;\mathit C} são funções \textbf{monádicas} que representam
+\emph{computações probabilísticas}.
+
+Este mónade é adequado à resolução de problemas de \emph{probabilidades e estatística} usando programação funcional, de forma elegante e como caso particular da programação monádica.
+
+\section{Código fornecido}\label{sec:codigo}
+
+\subsection*{Problema 1}
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{m1}\mathrel{=}[\mskip1.5mu [\mskip1.5mu \mathrm{1},\mathrm{2},\mathrm{3}\mskip1.5mu],[\mskip1.5mu \mathrm{4},\mathrm{5},\mathrm{6}\mskip1.5mu],[\mskip1.5mu \mathrm{7},\mathrm{8},\mathrm{9}\mskip1.5mu]\mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\Varid{m2}\mathrel{=}[\mskip1.5mu [\mskip1.5mu \mathrm{1},\mathrm{2},\mathrm{3},\mathrm{4}\mskip1.5mu],[\mskip1.5mu \mathrm{5},\mathrm{6},\mathrm{7},\mathrm{8}\mskip1.5mu],[\mskip1.5mu \mathrm{9},\mathrm{10},\mathrm{11},\mathrm{12}\mskip1.5mu]\mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\Varid{m3}\mathrel{=}\Varid{words}\;\text{\ttfamily \char34 Cristina~Monteiro~Carvalho~Sequeira\char34}{}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{test1}\mathrel{=}\Varid{matrot}\;\Varid{m1}\equiv [\mskip1.5mu \mathrm{1},\mathrm{2},\mathrm{3},\mathrm{6},\mathrm{9},\mathrm{8},\mathrm{7},\mathrm{4},\mathrm{5}\mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\Varid{test2}\mathrel{=}\Varid{matrot}\;\Varid{m2}\equiv [\mskip1.5mu \mathrm{1},\mathrm{2},\mathrm{3},\mathrm{4},\mathrm{8},\mathrm{12},\mathrm{11},\mathrm{10},\mathrm{9},\mathrm{5},\mathrm{6},\mathrm{7}\mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\Varid{test3}\mathrel{=}\Varid{matrot}\;\Varid{m3}\equiv \text{\ttfamily \char34 CristinaooarieuqeSCMonteirhlavra\char34}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\subsection*{Problema 2}
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{test4}\mathrel{=}\Varid{reverseVowels}\;\text{\ttfamily \char34 \char34}\equiv \text{\ttfamily \char34 \char34}{}\<[E]%
+\\
+\>[B]{}\Varid{test5}\mathrel{=}\Varid{reverseVowels}\;\text{\ttfamily \char34 ácidos\char34}\equiv \text{\ttfamily \char34 ocidás\char34}{}\<[E]%
+\\
+\>[B]{}\Varid{test6}\mathrel{=}\Varid{reverseByPredicate}\;\Varid{even}\;[\mskip1.5mu \mathrm{1}\mathinner{\ldotp\ldotp}\mathrm{20}\mskip1.5mu]\equiv [\mskip1.5mu \mathrm{1},\mathrm{20},\mathrm{3},\mathrm{18},\mathrm{5},\mathrm{16},\mathrm{7},\mathrm{14},\mathrm{9},\mathrm{12},\mathrm{11},\mathrm{10},\mathrm{13},\mathrm{8},\mathrm{15},\mathrm{6},\mathrm{17},\mathrm{4},\mathrm{19},\mathrm{2}\mskip1.5mu]{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\subsection*{Problema 3}
+
+Nenhum código é fornecido neste problema.
+
+\subsection*{Problema 4}
+Os atrasos, medidos em minutos, são inteiros:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\mathbf{type}\;\Conid{Delay}\mathrel{=}\mathbb{Z}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Amostra de dados apurados por passageiros: \label{pg:dados}
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{10}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{dados}\mathrel{=}[\mskip1.5mu ((\Conid{S0},\Conid{S1}),\mathrm{0}),((\Conid{S0},\Conid{S1}),\mathrm{2}),((\Conid{S0},\Conid{S1}),\mathrm{0}),((\Conid{S0},\Conid{S1}),\mathrm{3}),((\Conid{S0},\Conid{S1}),\mathrm{3}),{}\<[E]%
+\\
+\>[B]{}\hsindent{10}{}\<[10]%
+\>[10]{}((\Conid{S1},\Conid{S2}),\mathrm{0}),((\Conid{S1},\Conid{S2}),\mathrm{2}),((\Conid{S1},\Conid{S2}),\mathrm{1}),((\Conid{S1},\Conid{S2}),\mathrm{1}),((\Conid{S1},\Conid{S2}),\mathrm{4}),{}\<[E]%
+\\
+\>[B]{}\hsindent{10}{}\<[10]%
+\>[10]{}((\Conid{S2},\Conid{S3}),\mathrm{2}),((\Conid{S2},\Conid{S3}),\mathrm{2}),((\Conid{S2},\Conid{S3}),\mathrm{4}),((\Conid{S2},\Conid{S3}),\mathrm{0}),((\Conid{S2},\Conid{S3}),\mathrm{5}),{}\<[E]%
+\\
+\>[B]{}\hsindent{10}{}\<[10]%
+\>[10]{}((\Conid{S3},\Conid{S4}),\mathrm{2}),((\Conid{S3},\Conid{S4}),\mathrm{3}),((\Conid{S3},\Conid{S4}),\mathrm{5}),((\Conid{S3},\Conid{S4}),\mathrm{2}),((\Conid{S3},\Conid{S4}),\mathrm{0}),{}\<[E]%
+\\
+\>[B]{}\hsindent{10}{}\<[10]%
+\>[10]{}((\Conid{S4},\Conid{S5}),\mathrm{0}),((\Conid{S4},\Conid{S5}),\mathrm{5}),((\Conid{S4},\Conid{S5}),\mathrm{0}),((\Conid{S4},\Conid{S5}),\mathrm{7}),((\Conid{S4},\Conid{S5}),\mathbin{-}\mathrm{1})\mskip1.5mu]{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+\emph{``Funcionalização'' de listas}:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{mkf}\mathbin{::}\Conid{Eq}\;\Varid{a}\Rightarrow [\mskip1.5mu (\Varid{a},\Varid{b})\mskip1.5mu]\to \Varid{a}\to \Conid{Maybe}\;\Varid{b}{}\<[E]%
+\\
+\>[B]{}\Varid{mkf}\mathrel{=}\Varid{flip}\;\Varid{\Conid{Prelude}.lookup}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Ausência de qualquer atraso:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{instantaneous}\mathbin{::}\fun{Dist}\;\Conid{Delay}{}\<[E]%
+\\
+\>[B]{}\Varid{instantaneous}\mathrel{=}\Conid{D}\;[\mskip1.5mu (\mathrm{0},\mathrm{1})\mskip1.5mu]{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+%----------------- Soluções dos alunos -----------------------------------------%
+
+\section{Soluções dos alunos}\label{sec:resolucao}
+Os alunos devem colocar neste anexo as suas soluções para os exercícios
+propostos, de acordo com o ``layout'' que se fornece.
+Não podem ser alterados os nomes ou tipos das funções dadas, mas pode ser
+adicionado texto ao anexo, bem como diagramas e/ou outras funções auxiliares
+que sejam necessárias.
+
+\noindent
+\textbf{Importante}: Não pode ser alterado o texto deste ficheiro fora deste anexo.
+
+\subsection*{Problema 1}
+
+Depois de analisar o problema dado, o grupo concluiu que o mesmo se resumia a um simples catamorfismo.\par
+A estratégia desenvolvida para a resolução do exercício foi a seguinte:\par
+\begin{enumerate}
+    \item Pegar na cabeça da lista, visto que já está na ordem pretendida;
+    \item Transpor o resto da matriz de forma a que a próxima cabeça da lista fique na ordem pretendida;
+    \item Repetir o processo até que a lista esteja vazia, usando o catamorfismo.
+\end{enumerate}
+
+Esta estratégia é representada pelo seguinte diagrama:
+
+\begin{eqnarray*}
+\xymatrix@C=2cm{
+    {\ensuremath{\Conid{A}}^*}^* 
+           \ar[d]_-{\ensuremath{\llparenthesis\, \Varid{matrot}\,\rrparenthesis}}
+           \ar[r]^-{\ensuremath{\Varid{myOutList}}}
+&
+    \ensuremath{\mathrm{1}\mathbin{+}} \ensuremath{\Conid{A}}^* \ensuremath{\times} {\ensuremath{\Conid{A}}^*}^*
+           \ar[d]^{\ensuremath{\Varid{id}\mathbin{+}\Varid{id}\times\llparenthesis\, \Varid{matrot}\,\rrparenthesis}}
+\\
+     \ensuremath{\Conid{A}}^*
+&
+     \ensuremath{\mathrm{1}\mathbin{+}} \ensuremath{\Conid{A}}^* \ensuremath{\times} \ensuremath{\Conid{A}}^* 
+           \ar[l]^-{\ensuremath{\Varid{g}\mathrel{=}\alt{\Varid{nil}}{\mathsf{conc}}}}
+}
+\end{eqnarray*}
+
+A função $myOutList$ aplica desde já a transposição à matriz para que esta preocupação não seja da função $matrot$.\par
+
+Esta função, chamada de $f$, é representada pelo seguinte diagrama, que também é um catamorfismo:
+
+\begin{eqnarray*}
+\xymatrix@C=2cm{
+    {\ensuremath{\Conid{A}}^*}^* 
+           \ar[d]_-{\ensuremath{\llparenthesis\, \Varid{f}\,\rrparenthesis}}
+           \ar[r]^-{\ensuremath{\Varid{outMatrix}}}
+&
+    \ensuremath{\mathrm{1}\mathbin{+}} \ensuremath{\Conid{A}}^* \ensuremath{\times} {\ensuremath{\Conid{A}}^*}^*
+           \ar[d]^{\ensuremath{\Varid{id}\mathbin{+}\Varid{id}\times\llparenthesis\, \Varid{f}\,\rrparenthesis}}
+\\
+     {\ensuremath{\Conid{A}}^*}^*
+&
+     \ensuremath{\mathrm{1}\mathbin{+}} \ensuremath{\Conid{A}}^* \ensuremath{\times} {\ensuremath{\Conid{A}}^*}^*
+           \ar[l]^-{\ensuremath{\Varid{g}\mathrel{=}\alt{\Varid{nil}}{\Varid{cons}}}}
+}
+\end{eqnarray*}
+
+É aplicado aqui um novo $out$, o $outMatrix$, que cria as linhas da nova matriz, pegando nos ultimos elementos de cada linha,
+ e manda o resto da matriz no segundo elemento do either para ser processado pelo catamorfismo.\par
+
+Para além disso, ainda desenvolvemos uma outra versão da função $matrot$, $matrotV2$, que usa funções pré-definidas do Haskell para a resolução do problema, mais precisamente a função $transpose$ e a função $reverse$.\par
+No entanto, ao contrário da estratégia apresentada anteriormente, esta função não é um verdadeiro catamorfismo, apesar de ter um comportamento semelhante.\par 
+
+Podemos então ver o código desenvolvido pelo grupo que resolve o problema proposto:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{myOutList}\;[\mskip1.5mu \mskip1.5mu]\mathrel{=}i_1\;(){}\<[E]%
+\\
+\>[B]{}\Varid{myOutList}\;(\Varid{h}\mathbin{:}\Varid{t})\mathrel{=}i_2\;(\Varid{h},\Varid{f}\;\Varid{t}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{outMatrix}\;([\mskip1.5mu \mskip1.5mu]\mathbin{:}\Varid{xs})\mathrel{=}i_1\;(){}\<[E]%
+\\
+\>[B]{}\Varid{outMatrix}\;\Varid{l}\mathrel{=}i_2\;(\map \;\Varid{last}\;\Varid{l},\map \;\Varid{init}\;\Varid{l}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{matrot}\mathbin{::}\Conid{Eq}\;\Varid{a}\Rightarrow [\mskip1.5mu [\mskip1.5mu \Varid{a}\mskip1.5mu]\mskip1.5mu]\to [\mskip1.5mu \Varid{a}\mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\Varid{matrot}\mathrel{=}\alt{\Varid{nil}}{\mathsf{conc}}\comp \Varid{recList}\;\Varid{matrot}\comp \Varid{myOutList}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{f}\mathrel{=}\alt{\Varid{nil}}{\Varid{cons}}\comp \Varid{recList}\;\Varid{f}\comp \Varid{outMatrix}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{matrotV2}\mathrel{=}\alt{\Varid{nil}}{\mathsf{conc}}\comp \Varid{recList}\;(\Varid{matrotV2}\comp \Varid{reverse}\comp \Varid{transpose})\comp \Varid{outList}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\subsection*{Problema 2}
+
+Neste problema, o grupo desenvolveu duas funções principais, a $reverseVowels$ e a $reverseByPredicate$.\par
+
+Começando pela $reverseVowels$, primeiramente foi desenvolvida uma função auxiliar, a $trocaVowels$, que troca as vogais de uma string por outras vogais,
+ dadas numa outra string. Esta função pode ser representada por um anamorfismo, cujo gene é trivial observando a própria função.
+Assim, foi desenvolvido o $geneTwoLists$, que recebe duas strings e devolve um either com a primeira string, caso a segunda seja vazia, ou com um par. O valor do par depende do primeiro elemento da primeira string:
+\begin{enumerate}
+    \item Se o primeiro elemento da primeira string for uma vogal:
+        \begin{enumerate}
+            \item 1º elemento do par: primeiro elemento da segunda string;
+            \item 2º elemento do par: par com o resto da primeira string e o resto da segunda string.
+        \end{enumerate}    
+    \item Se o primeiro elemento da primeira string não for uma vogal:
+        \begin{enumerate}
+            \item 1º elemento do par: primeiro elemento da primeira string;
+            \item 2º elemento do par: par com o resto da primeira string e a segunda string inteira.
+        \end{enumerate}
+\end{enumerate}
+
+Com estas funções, é possível criar o seguinte diagrama para a $trocaVowels$:    
+
+\begin{eqnarray*}
+\xymatrix@C=2cm{
+        \ensuremath{\Conid{A}}^*
+&
+        \ensuremath{\Conid{A}}^* \ensuremath{\mathbin{+}(\Conid{A}\times} \ensuremath{\Conid{A}}^* \ensuremath{)}
+            \ar[l]_-{\ensuremath{\mathbf{in}\mathrel{=}\alt{\Varid{id}}{\Varid{cons}}}}
+\\
+    \ensuremath{\Conid{A}}^* \ensuremath{\times} \ensuremath{\Conid{A}}^* 
+           \ar[u]^-{\ensuremath{\anaList{\Varid{trocaVowelsFinal}}}}
+           \ar[r]_-{\ensuremath{\Varid{geneTwoLists}}}
+&
+    \ensuremath{\Conid{A}}^* \ensuremath{\mathbin{+}(\Conid{A}\times(} \ensuremath{\Conid{A}}^* \ensuremath{\times} \ensuremath{\Conid{A}}^* \ensuremath{))}
+           \ar[u]_{\ensuremath{\Varid{id}\mathbin{+}\Varid{id}\times\anaList{\Varid{trocaVowelsFinal}}}}
+    }
+\end{eqnarray*}
+
+De seguida, foi então desenvolvida a função $reverseVowels$, que recebe uma string e devolve-a com as vogais invertidas.
+A estratégia utilizada para a resolução deste problema foi a seguinte:
+\begin{enumerate}
+    \item Criar um par de $strings$ a partir da original utilizando um split;
+    \item O primeiro elemento do par é a $string$ original, enquanto o segundo elemento é uma $string$ constituída pelas vogais presentes na $string$ original, só que invertidas;
+    \item Trocar as vogais da primeira string pelas vogais da segunda utilizando a função $trocaVowels$.
+\end{enumerate}
+
+Assim, o diagrama da função $reverseVowels$ é o seguinte:
+\begin{eqnarray*}
+\xymatrix@C=1cm{
+&
+        \ensuremath{\Conid{A}}^*
+            \ar[dl]_-{\ensuremath{\Varid{id}}}
+            \ar[dr]^-{\ensuremath{\Varid{reverse}\comp \Varid{filter}\;\Varid{isVowel}}}
+&
+\\
+        \ensuremath{\Conid{A}}^*
+&
+        \ensuremath{\Conid{A}}^* \ensuremath{\times} \ensuremath{\Conid{A}}^*
+            \ar[l]^-{\ensuremath{\p1}}
+            \ar[r]_-{\ensuremath{\p2}}
+            \ar[d]^-{\ensuremath{\Varid{trocaVowelsFinal}}}
+&
+        \ensuremath{\Conid{A}}^*
+\\
+&
+        \ensuremath{\Conid{A}}^*
+&
+    }
+\end{eqnarray*}
+
+Finalmente, foi desenvolvida a função $reverseByPredicate$ que recebe uma função e uma lista e devolve-a com os elementos que satisfazem a função passada como argumento com ordem invertida. 
+A estratégia utilizada para a resolução deste problema foi a seguinte:
+\begin{enumerate}
+    \item Tal como na função $reverseVowels$, é criado um par de $strings$ a partir da original utilizando um split, os elementos do par também são idênticos;
+    \item É aplicada a função $trocaItemsFinal$ ao par
+    \item A única diferença entre a função $reverseVowels$ e a função $reverseByPredicate$ é que a função utilizada no $filter$ é a função passada como argumento, em vez da $isVowel$.
+\end{enumerate}    
+
+Com isto, o diagrama da função $reverseByPredicate$ é semelhante ao da função $reverseVowels$. As únicas diferenças são a presença da função $p$, passada como argumento, em vez da $isVowel$, e o uso da função $trocaItemsFinal$ em vez da $trocaVowelsFinal$:
+
+Para além disso, desenvolvêmos também uma segunda versão da função $reverseByPredicate$, a $reverseByPredicateV2$, que permite realizar a tarefa desejada sem ser necessária a presença de uma função nos argumentos. Por esta
+razão é que o diagrama da função $reverseByPredicateV2$ é diferente do da função $reverseByPredicate$:
+
+\begin{eqnarray*}
+\xymatrix@C=1cm{
+&
+        \ensuremath{\Varid{reverseByPredicateV2}\;\Varid{p}\;\Varid{l}} 
+            \ar[d]^-{curry}
+&
+\\
+&
+        \ensuremath{\overline{\Varid{reverseByPredicateV2}}\;(\Varid{p},\Varid{l})}
+            \ar[d]
+&
+\\
+&
+        \ensuremath{\Conid{P}\times} \ensuremath{\Conid{A}}^*
+            \ar[dr]^-{\ensuremath{\conj{\p2}{\Varid{revese}\comp \uncurry{\Varid{filter}}}}}
+            \ar[dl]_-{\ensuremath{\p1}} 
+&
+\\
+        \ensuremath{\Conid{P}}
+&
+        \ensuremath{\Conid{P}\times(} \ensuremath{\Conid{A}}^* \ensuremath{\times} \ensuremath{\Conid{A}}^* \ensuremath{)}
+            \ar[l]^-{\ensuremath{\p1}}
+            \ar[r]_-{\ensuremath{\p2}}
+            \ar[d]^-{\ensuremath{\Varid{trocaItemsFinalV2}}}  
+&
+        \ensuremath{\Conid{A}}^* \ensuremath{\times} \ensuremath{\Conid{A}}^*
+\\
+&
+        \ensuremath{\Conid{A}}^* 
+&
+    }
+\end{eqnarray*}
+
+De seguida, apresentamos o código desenvolvido com todas as funções referidas anteriormente:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{isVowel}\mathrel{=}(\in \text{\ttfamily \char34 áàâãaeéèêiíìîóòôõoúùûuAÀÁÂÃEÉÈÊIÍÌÎÓÒÕÔOÚÙÛU\char34}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{9}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{trocaVowels}\mathbin{::}(\Conid{String},\Conid{String})\to \Conid{String}{}\<[E]%
+\\
+\>[B]{}\Varid{trocaVowels}\;(\Varid{l},[\mskip1.5mu \mskip1.5mu])\mathrel{=}\Varid{l}{}\<[E]%
+\\
+\>[B]{}\Varid{trocaVowels}\;((\Varid{x}\mathbin{:}\Varid{xs}),(\Varid{y}\mathbin{:}\Varid{ys}))\mathrel{=}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\mathbf{case}\;\Varid{isVowel}\;\Varid{x}\;\mathbf{of}{}\<[E]%
+\\
+\>[5]{}\hsindent{4}{}\<[9]%
+\>[9]{}\Conid{True}\to \Varid{y}\mathbin{:}\Varid{trocaVowels}\;(\Varid{xs},\Varid{ys}){}\<[E]%
+\\
+\>[5]{}\hsindent{4}{}\<[9]%
+\>[9]{}\Conid{False}\to \Varid{x}\mathbin{:}\Varid{trocaVowels}\;(\Varid{xs},(\Varid{y}\mathbin{:}\Varid{ys})){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{geneTwoLists}\;\anonymous \;(\Varid{xs},[\mskip1.5mu \mskip1.5mu])\mathrel{=}i_1\;\Varid{xs}{}\<[E]%
+\\
+\>[B]{}\Varid{geneTwoLists}\;\Varid{f}\;(\Varid{x}\mathbin{:}\Varid{xs},\Varid{y}\mathbin{:}\Varid{ys})\mathrel{=}\mathbf{if}\;\Varid{f}\;\Varid{x}\;\mathbf{then}\;i_2\;(\Varid{y},(\Varid{xs},\Varid{ys}))\;\mathbf{else}\;i_2\;(\Varid{x},(\Varid{xs},\Varid{y}\mathbin{:}\Varid{ys})){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{trocaVowelsFinal}\mathrel{=}\alt{\Varid{id}}{\Varid{cons}}\comp \Varid{recList}\;\Varid{trocaVowelsFinal}\comp \Varid{geneTwoLists}\;\Varid{isVowel}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{18}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{reverseVowels}\mathbin{::}\Conid{String}\to \Conid{String}{}\<[E]%
+\\
+\>[B]{}\Varid{reverseVowels}\mathrel{=}{}\<[18]%
+\>[18]{}\Varid{trocaVowelsFinal}\comp \conj{\Varid{id}}{\Varid{reverse}\comp \Varid{filter}\;\Varid{isVowel}}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{25}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{reverseByPredicate}\mathbin{::}(\Varid{a}\to \Conid{Bool})\to [\mskip1.5mu \Varid{a}\mskip1.5mu]\to [\mskip1.5mu \Varid{a}\mskip1.5mu]{}\<[E]%
+\\
+\>[B]{}\Varid{reverseByPredicate}\;\Varid{p}\mathrel{=}{}\<[25]%
+\>[25]{}\Varid{trocaItemsFinal}\comp \conj{\Varid{id}}{\Varid{reverse}\comp \Varid{filter}\;\Varid{p}}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{trocaItemsFinal}\mathrel{=}\alt{\Varid{id}}{\Varid{cons}}\comp \Varid{recList}\;\Varid{trocaItemsFinal}\comp \Varid{geneTwoLists}\;\Varid{p}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{reverseByPredicateV2}\mathrel{=}\overline{\Varid{trocaItemsFinalV2}\comp \conj{\p1}{\conj{\p2}{\Varid{reverse}\comp \uncurry{(\Varid{filter})}}}}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{trocaItemsFinalV2}\mathrel{=}\alt{\Varid{id}}{\Varid{cons}}\comp \Varid{recList}\;\Varid{trocaItemsFinalV2}\comp \Varid{geneTwoListsV2}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{geneTwoListsV2}\;(\anonymous ,(\Varid{xs},[\mskip1.5mu \mskip1.5mu]))\mathrel{=}i_1\;\Varid{xs}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{geneTwoListsV2}\;(\Varid{f},(\Varid{x}\mathbin{:}\Varid{xs},\Varid{y}\mathbin{:}\Varid{ys}))\mathrel{=}\mathbf{if}\;\Varid{f}\;\Varid{x}\;\mathbf{then}\;i_2\;(\Varid{y},(\Varid{f},(\Varid{xs},\Varid{ys})))\;\mathbf{else}\;i_2\;(\Varid{x},(\Varid{f},(\Varid{xs},\Varid{y}\mathbin{:}\Varid{ys}))){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+
+\subsection*{Problema 3}
+
+Como indicado no enunciado, este problema pode ser otimizado utilizando o conceito de programação dinâmica para derivar um ciclo \textit{for} 
+via lei de recursividade mútua.\par
+Uma primeira análise a este problema indica que uma abordagem \textit{Bottom Up} seria a mais indicada para 
+este problema específico, visto que a decomposição da exponenciação e da fatorização presentes na equação poderão permitir definir o valor de uma 
+iteração do somatório em função da imediatamente anterior a essa, permitindo assim calcular cada nova iteração \textit{``guardando''} o valor 
+calculado em iterações anteriores e multiplicando-o por um determinado valor. \par
+Esta abordagem torna o cálculo mais eficiente do que calcular todos os valores do somatório de forma independente, pois existiriam muitos cálculos
+repetidos desnecessários, visto que o valor da iteração seguinte pode ser calculado usando o valor da iteração anterior\footnote{Por exemplo: 
+calcular fatoriais de 1 a 10 independentemente quando podemos apenas definir o fatorial de certo valor em função do anterior vezes o número que 
+estamos a fatorizar}. Para além disso, é mais eficiente que a abordagem \textit{Top Down} pois esta perderia tempo a calcular imediatamente a 
+última iteração (a mais complexa) e depois calcularia as iterações mais pequenas a partir dessa, perdendo assim a eficiência de parte do cálculo 
+da próxima iteração ser o resultado da iteração anterior.\par
+
+Com a abordagem definida, a resolução do problema começa por perguntar a seguinte questão: \textit{Existe uma forma de calcular o valor em certa 
+iteração em função da iteração anterior? Se sim, qual é?}\par
+Começamos por avaliar a equação inicial:
+
+\begin{eqnarray}
+	snh\ x\ i = \sum_{k=0}^i \frac{x^{2k+1}}{(2k+1)!}
+\end{eqnarray}
+Podemos separá-la em dois casos, quando o número de iterações é 0 e quando o número de iterações é maior que 0, definindo este segundo 
+recursivamente ao invés de com um somatório:
+
+\begin{equation}
+    \begin{cases}
+          snh\;x\; 0 = x \\ 
+          snh\;x\;(i+1)= \frac {x^{2\times(i+1)+1}} {(2(i+1)+1)!} + snh\;x\;i
+        \end{cases}
+\end{equation}
+
+Podemos agora mover a primeira componente da adição de cada iteração para uma função auxiliar e também tentar defini-la de forma recursiva:
+
+
+\begin{equation}
+        \begin{cases}
+          snh\;x\; 0 = f\;x\;0 \\ 
+          snh\;x\;(n+1)= f\;x\;(n+1) + snh\;x\;n
+          \end{cases}
+\end{equation}
+\begin{equation}
+        \begin{cases}
+            f\;x\; 0 = \frac {x^{2\times0+1} \times x^{2\times0+1}} {(2\times0+1)!} \\ 
+            f\;x\;(n+1) = \frac {x^{2} \times x^{2n+1}} {(2+2n+1)!} 
+        \end{cases}
+\end{equation}
+\begin{equation}
+        \Leftrightarrow
+        \begin{cases}
+            f\;x\; 0 = x \\ 
+            f\;x\;(n+1) = \frac {x^{2}} {(2n+1) \times (2n)} \times f\;x\;n
+        \end{cases}
+\end{equation}
+
+Conseguimos assim duas funções mutuamente recursivas (snh depende de si mesma e de f, f apenas de si própria). Podemos deste modo inferir
+um \textit{for loop} que implemente essa funcionalidade,onde:
+\begin{itemize}
+  \item \textit{loop} recebe um par (snh,f) e realiza as transformações definidas acima
+  \item A condição inicial (\textit{start}) seria um par com valor igual aos casos de paragem
+  \item O resultado final é determinado pela soma do valor das duas funções na iteração final (Como definido em snh, é a soma da iteração de f atual com o snh da iteração anterior, devido à natureza das funções mutuamente recursivas snh no fim do loop apenas tem o resultado da iteração anterior)
+\end{itemize}
+Sendo assim ficaríamos com uma função deste género:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{snh}\;\Varid{x}\mathrel{=}\Varid{wrapper}\comp \Varid{worker}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{worker}\mathrel{=}\for{\Varid{loop}}\ {\Varid{start}}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{wrapper}\;(\Varid{res},\Varid{f})\mathrel{=}\Varid{res}\mathbin{+}\Varid{f}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{loop}\;(\Varid{snh},\Varid{f})\mathrel{=}(\Varid{snh}\mathbin{+}\Varid{f},(\Varid{f}\mathbin{*}\Varid{x}\mathbin{**}\mathrm{2})\mathbin{/}(\mathrm{4}\mathbin{*}\Varid{k}\mathbin{**}\mathrm{2}\mathbin{+}\mathrm{2}\mathbin{*}\Varid{k})){}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{start}\mathrel{=}(\mathrm{0},\Varid{x}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+No entanto, existe um problema. Onde é que o programa encontra esse k  (número da iteração atual)? É verdade que é um argumento (implícito) da função snh, mas analisando a função for da biblioteca Nat,
+percebemos que esta não torna disponível o número da iteração de forma explícita a \textit{loop}. Sendo assim precisaremos de uma terceira função que conte e disponibilize o número da iteração
+atual a f. Deste modo, obtemos:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{snh}\;\Varid{x}\mathrel{=}\Varid{wrapper}\comp \Varid{worker}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{worker}\mathrel{=}\for{\Varid{loop}}\ {\Varid{start}}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{wrapper}\;(\Varid{res},\Varid{f},\anonymous )\mathrel{=}\Varid{res}\mathbin{+}\Varid{f}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{loop}\;(\Varid{snh},\Varid{f},\Varid{k})\mathrel{=}(\Varid{snh}\mathbin{+}\Varid{f},(\Varid{f}\mathbin{*}\Varid{x}\mathbin{**}\mathrm{2})\mathbin{/}(\mathrm{4}\mathbin{*}\Varid{k}\mathbin{**}\mathrm{2}\mathbin{+}\mathrm{2}\mathbin{*}\Varid{k}),\succ \;\Varid{k}){}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{start}\mathrel{=}(\mathrm{0},\Varid{x},\mathrm{1}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Chegamos assim a uma solução satisfatória de todos os requisitos pedidos. No entanto, não nos agradou o facto da terceira função, que pouco passa de um contador, estar
+assim tão ``explícita'', e optamos por colocá-la junto de f num par dentro do par principal, pois f depende da função contadora. Chegamos assim à seguinte solução:
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{snh}\;\Varid{x}\mathrel{=}\Varid{wrapper}\comp \Varid{worker}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{worker}\mathrel{=}\for{\Varid{loop}}\ {\Varid{start}}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{wrapper}\mathrel{=}\uncurry{(\mathbin{+})}\comp (\Varid{id}\times\p1){}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{loop}\;(\Varid{snh},\Varid{f})\mathrel{=}(\Varid{snh}\mathbin{+}\p1\;\Varid{f},(\Varid{nextIter}\;(\p2\;\Varid{f})\times\succ )\;\Varid{f}){}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{nextIter}\;\Varid{k}\;\Varid{v}\mathrel{=}(\Varid{v}\mathbin{*}\Varid{x}\mathbin{**}\mathrm{2})\mathbin{/}(\mathrm{4}\mathbin{*}\Varid{k}\mathbin{**}\mathrm{2}\mathbin{+}\mathrm{2}\mathbin{*}\Varid{k}){}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{start}\mathrel{=}(\mathrm{0},(\Varid{x},\mathrm{1})){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+No entanto, esta função ainda não está completamente de acordo com os requisitos estabelecidos. No enunciado é-nos pedido que a função \textit{worker} tenha a sintaxe 
+\textit{worker = for (loop x) (start x)}, o que implica que \textit{loop} e \textit{start} tenham de estar fora do corpo de \textit{snh} e passem a ser funções independentes.
+Para cumprir este requisito, desevolvemos a seguinte solução:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{snh}\;\Varid{x}\mathrel{=}\Varid{wrapper}\comp \Varid{worker}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{worker}\mathrel{=}\for{\Varid{loop}\;\Varid{x}}\ {\Varid{start}\;\Varid{x}}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{wrapper}\mathrel{=}\uncurry{(\mathbin{+})}\comp (\Varid{id}\times\p1){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{loop}\;\Varid{x}\;(\Varid{snh},\Varid{f})\mathrel{=}(\Varid{snh}\mathbin{+}\p1\;\Varid{f},(\Varid{nextIter}\;(\p2\;\Varid{f})\times\succ )\;\Varid{f})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{nextIter}\;\Varid{k}\;\Varid{v}\mathrel{=}(\Varid{v}\mathbin{*}\Varid{x}\mathbin{**}\mathrm{2})\mathbin{/}(\mathrm{4}\mathbin{*}\Varid{k}\mathbin{**}\mathrm{2}\mathbin{+}\mathrm{2}\mathbin{*}\Varid{k}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{start}\;\Varid{x}\mathrel{=}(\mathrm{0},(\Varid{x},\mathrm{1})){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+Esta solução preenche realmente todos os requisitos necessários. No entanto achamos interessante desenvolver uma versão onde as funções mutuamente recursivas em \textit{loop}
+não estão separadas nos argumentos, e que depois são utilizadas de acordo com uma sintaxe mais \textit{point-wise}. Aprensentamos aqui essa solução:
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{snh}\;\Varid{x}\mathrel{=}\Varid{wrapper}\comp \Varid{worker}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{worker}\mathrel{=}\for{\Varid{loop}\;\Varid{x}}\ {\Varid{start}\;\Varid{x}}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{wrapper}\mathrel{=}\uncurry{(\mathbin{+})}\comp (\Varid{id}\times\p1){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{loop}\;\Varid{x}\;\Varid{res}\mathrel{=}((\p1\;(\p2\;\Varid{res})\mathbin{+})\times(\Varid{nextIter}\;(\p2\;(\p2\;\Varid{res}))\times\succ ))\;\Varid{res}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{nextIter}\;\Varid{k}\;\Varid{v}\mathrel{=}(\Varid{v}\mathbin{*}\Varid{x}\mathbin{**}\mathrm{2})\mathbin{/}(\mathrm{4}\mathbin{*}\Varid{k}\mathbin{**}\mathrm{2}\mathbin{+}\mathrm{2}\mathbin{*}\Varid{k}){}\<[E]%
+\\[\blanklineskip]%
+\>[B]{}\Varid{start}\;\Varid{x}\mathrel{=}(\mathrm{0},(\Varid{x},\mathrm{1})){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+
+\subsection*{Problema 4}
+
+Passando agora para o exercicío 4, foi-nos pedido que desenvolvêssemos 4 funções que manipulam os dados fornecidos no exercício.
+Começando pela função $mkdist$, a mesma recebe uma lista finita de valores e devolve a distribuição de ocorrência dos seus elementos.
+A estratégia utilizada para a resolução deste problema foi a seguinte:
+\begin{enumerate}
+    \item criar um par em que o primeiro elemento é a lista de dados original e o segundo elemento é a lista de probabilidades;
+    \item aplicar a função $zip$ ao par criado anteriormente, de forma a que cada elemento da lista de dados original fique associado à sua probabilidade;
+    \item chamar a função $mkD$ com a lista de pares criada anteriormente como argumento, retornando assim a distribuição de ocorrência dos elementos.
+\end{enumerate}  
+
+Assim, é possível criar o seguinte diagrama para a função $mkdist$:
+
+\begin{eqnarray*}
+\xymatrix@C=1cm{
+&
+        \ensuremath{\Conid{A}}^*
+            \ar[dl]_-{\ensuremath{\Varid{id}}}
+            \ar[dr]^-{\ensuremath{\uncurry{\Varid{replicate}}\comp \conj{\length }{\Varid{prob}}}}
+&
+\\
+        \ensuremath{\Conid{A}}^*
+&
+        \ensuremath{\Conid{A}}^* \ensuremath{\times} \ensuremath{\Conid{ProbRep}}^*
+            \ar[l]^-{\ensuremath{\p1}}
+            \ar[r]_-{\ensuremath{\p2}}
+            \ar[d]^-{\ensuremath{\uncurry{\Varid{zip}}}}
+&
+        \ensuremath{\Conid{Prob}}^*
+\\
+&
+        {(\ensuremath{\Conid{A}} \ensuremath{\times} \ensuremath{\Conid{ProbRep}})}^*
+            \ar[d]^-{\ensuremath{\Varid{mkD}}}
+&
+\\
+&
+        \ensuremath{\fun{Dist}\;\Conid{A}}
+    }
+\end{eqnarray*}
+
+De seguida, foi desenvolvida a função $db$ que recebe e devolve uma lista de pares, em que o primeiro elemento é o elemento do par original e o segundo elemento é a distribuição dos atrasos do mesmo.
+A estratégia utilizada para a resolução deste problema foi a seguinte:
+\begin{enumerate}
+    \item Agrupar os pares da lista original pelos segmentos de partida e chegada;
+    \item Para cada segmento, criar um par em que o primeiro elemento é o segmento e o segundo elemento é a distribuição de ocorrência dos atrasos;
+    \item É utilizado um $map$ para aplicar a função $split$ a cada par da lista original.
+\end{enumerate}
+
+Com isto, é possível criar o seguinte diagrama para a função $db$, à esquerda, e para o split usado no $map$, à direita:
+
+\begin{eqnarray*}
+\xymatrix@C=1cm{
+        \ensuremath{(\Conid{Seg}\times\Conid{Delay})}^*
+            \ar[d]^-{g}
+&
+&
+&
+        \ensuremath{(\Conid{Seg}\times\Conid{Delay})}^* 
+            \ar[ld]_-{\ensuremath{\p1\comp \Varid{head}}}
+            \ar[rd]^-{\ensuremath{\Varid{mkdist}\comp \map \;\p2}}
+&  
+\\
+        \ensuremath{((\Conid{Seg}\times\Conid{Delay})}^*\ensuremath{)}^* 
+            \ar[d]_-{\ensuremath{\map \;\conj{\p1\comp \Varid{head}}{\Varid{mkdist}\comp \map \;\p2}}} 
+&
+&
+        \ensuremath{\Conid{Seg}}
+&
+        \ensuremath{\Conid{Seg}\times\fun{Dist}\;\Conid{Delay}}
+            \ar[l]^-{\ensuremath{\p1}}
+            \ar[r]_-{\ensuremath{\p2}}
+&
+        \ensuremath{\fun{Dist}\;\Conid{Delay}}
+\\
+        \ensuremath{(\Conid{Seg}\times\fun{Dist}\;\Conid{Delay})}^*
+&
+&
+&
+& 
+}
+\end{eqnarray*}
+
+Continuando, foi desenvolvida a função $delay$ que recebe um segmento e devolve a distribuição de ocorrência dos atrasos desse segmento.
+A estratégia utilizada para a resolução deste problema foi a seguinte:
+\begin{enumerate}
+    \item É chamada a função $mkf$ com a lista de pares e o segmento como argumentos;
+    \item Se a função $mkf$ devolver $Nothing$, então é devolvida a distribuição $instantaneous$;
+    \item Se a função $mkf$ devolver $Just$, então é devolvida a distribuição devolvida pela função $mkf$. 
+\end{enumerate}
+
+Devido à complexidade reduzida da função não foi criado um diagrama para a mesma.\par
+
+Por fim, foi desenvolvida a função $pdelay$, que recebe duas paragens e devolve a distribuição de atrasos acumulados entre as duas paragens. Antes de calcular a distribução é necessário calcular os segmentos entre as duas paragens,
+para isso é gerada uma lista de paragens entre as duas, usando a função $enumFromTo$, cuja lista é passada para a expressão $zip <*> tail$. Esta expressão irá calcular os segmentos entre as paragens, usando o operador de aplicação sequencial.
+Este operador irá passar a lista resultante de aplicar $tail$ à lista de paragens para a função $zip$, que irá manter a lista original, juntando assim as duas listas originandos os segmentos. Desta forma, tendo obtido os segmentos, 
+é possível calcular a distribuição de atrasos acumulados. Para isso é usado a função $foldl$ que irá aplicar a função $g$ a cada segmento, acumulando os atrasos, em que o caso inicial é a distribuição $instantaneous$, que funciona como elemento
+neutro. A função $g$ tira proveito do monad desenvolvido para a resolução do problema, usando o operador de composição de Kleisli, que irá aplicar a função $p$ ao atraso acumulado e à distribuição de atrasos do segmento, obtendo assim a
+distribuição de atrasos acumulados do segmento seguinte. É fácil de se notar que a função $p$ irá percorrer a distribuição do segmento e irá somar o atraso acumulado ao atraso de cada elemento da distribuição. Desta forma, o próprio monad
+irá calcular as probablidades de cada atraso acumulado. 
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{db}\mathrel{=}\map \;\conj{\p1\comp \Varid{head}}{\Varid{mkdist}\comp \map \;\p2}\;(\Varid{g}\;\Varid{dados})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{g}\mathrel{=}\Varid{groupBy}\;\overline{\uncurry{(\equiv )}\comp (\p1\times\p1)}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{mkdist}\mathrel{=}\Varid{mkD}\comp \uncurry{\Varid{zip}}\comp \conj{\Varid{id}}{\uncurry{\Varid{replicate}}\comp \conj{\length }{\Varid{prob}}}\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{prob}\mathrel{=}(\mathrm{1}\mathbin{/})\comp \Varid{fromIntegral}\comp \length {}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{delay}\mathrel{=}\Varid{maybe}\;\Varid{instantaneous}\;\Varid{id}\comp \Varid{mkf}\;\Varid{db}{}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+\begin{hscode}\SaveRestoreHook
+\column{B}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{5}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{E}{@{}>{\hspre}l<{\hspost}@{}}%
+\>[B]{}\Varid{pdelay}\;\Varid{a}\;\Varid{b}\mathrel{=}\Varid{foldl}\;\Varid{g}\;\Varid{instantaneous}\mathbin{\$}((\Varid{zip}\mathbin{<*>}\Varid{tail})\mathbin{\$}\Varid{enumFromTo}\;\Varid{a}\;\Varid{b})\;\mathbf{where}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{g}\mathrel{=}\overline{\uncurry{(\bind )}\comp (\Varid{id}\times\Varid{p})}{}\<[E]%
+\\
+\>[B]{}\hsindent{5}{}\<[5]%
+\>[5]{}\Varid{p}\;\Varid{s}\;\Varid{x}\mathrel{=}\mathsf{fmap}\;(\Varid{x}\mathbin{+})\;(\Varid{delay}\;\Varid{s}){}\<[E]%
+\ColumnHook
+\end{hscode}\resethooks
+
+%----------------- Índice remissivo (exige makeindex) -------------------------%
+
+\printindex
+
+%----------------- Bibliografia (exige bibtex) --------------------------------%
+
+\bibliographystyle{plain}
+\bibliography{cp2324t}
+
+%----------------- Fim do documento -------------------------------------------%
+\end{document}

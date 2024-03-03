@@ -1,0 +1,47 @@
+\begin{theindex}
+
+  \item \LaTeX  , \hyperpage{3, 4}
+    \subitem \texttt  {bibtex}, \hyperpage{4}
+    \subitem \texttt  {lhs2TeX}, \hyperpage{3--5}
+    \subitem \texttt  {makeindex}, \hyperpage{4}
+    \subitem \texttt  {pdflatex}, \hyperpage{3}
+    \subitem \texttt  {xymatrix}, \hyperpage{5}
+
+  \indexspace
+
+  \item Combinador ``pointfree''
+    \subitem \emph  {cata}
+      \subsubitem Naturais, \hyperpage{5}
+    \subitem \emph  {either}, \hyperpage{1}
+    \subitem \emph  {split}, \hyperpage{1}, \hyperpage{5}
+  \item Cálculo de Programas, \hyperpage{1}, \hyperpage{3}
+    \subitem Material Pedagógico, \hyperpage{3}
+
+  \indexspace
+
+  \item Docker, \hyperpage{3}
+    \subitem container, \hyperpage{3, 4}
+
+  \indexspace
+
+  \item Função
+    \subitem $\pi _1$, \hyperpage{5}
+    \subitem $\pi _2$, \hyperpage{5}
+
+  \indexspace
+
+  \item Haskell, \hyperpage{1}, \hyperpage{3, 4}
+    \subitem interpretador
+      \subsubitem GHCi, \hyperpage{3, 4}
+    \subitem Literate Haskell, \hyperpage{3}
+
+  \indexspace
+
+  \item Números naturais ($\mathbb  {N}$), \hyperpage{5}
+
+  \indexspace
+
+  \item Programação
+    \subitem literária, \hyperpage{3, 4}
+
+\end{theindex}
